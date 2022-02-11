@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<script type="text/javascript" src="PeriodicFractionSolver.js"></script>
+
+	<input type="text" id="num">
+	<button onclick="fibo()">Click</button>
+	<p id="res">Result</p>
+
+	<script type="text/javascript">
+		// var Module = require("./periodicfractionsolver.js");
+		var pfsSolve = Module.cwrap("pfsSolve", "string", ["string"]);
+		var input = document.querySelector("#num");
+		var result = document.querySelector("#res");
+
+		function fibo() {
+			console.log(input.value);
+			result.innerHTML = pfsSolve(input.value);
+		}
+	</script>
+</body>
+</html>
