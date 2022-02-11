@@ -1555,7 +1555,7 @@ function createExportWrapper(name, fixedasm) {
 }
 
 var wasmBinaryFile;
-  wasmBinaryFile = 'periodicfractionsolver.wasm';
+  wasmBinaryFile = 'TooManyEquations.wasm';
   if (!isDataURI(wasmBinaryFile)) {
     wasmBinaryFile = locateFile(wasmBinaryFile);
   }
@@ -1827,57 +1827,6 @@ var ASM_CONSTS = {
   function _emscripten_memcpy_big(dest, src, num) {
       HEAPU8.copyWithin(dest, src, src + num);
     }
-
-  function flush_NO_FILESYSTEM() {
-      // flush anything remaining in the buffers during shutdown
-      ___stdio_exit();
-      var buffers = SYSCALLS.buffers;
-      if (buffers[1].length) SYSCALLS.printChar(1, 10);
-      if (buffers[2].length) SYSCALLS.printChar(2, 10);
-    }
-  
-  var SYSCALLS = {mappings:{},buffers:[null,[],[]],printChar:function(stream, curr) {
-        var buffer = SYSCALLS.buffers[stream];
-        assert(buffer);
-        if (curr === 0 || curr === 10) {
-          (stream === 1 ? out : err)(UTF8ArrayToString(buffer, 0));
-          buffer.length = 0;
-        } else {
-          buffer.push(curr);
-        }
-      },varargs:undefined,get:function() {
-        assert(SYSCALLS.varargs != undefined);
-        SYSCALLS.varargs += 4;
-        var ret = HEAP32[(((SYSCALLS.varargs)-(4))>>2)];
-        return ret;
-      },getStr:function(ptr) {
-        var ret = UTF8ToString(ptr);
-        return ret;
-      },get64:function(low, high) {
-        if (low >= 0) assert(high === 0);
-        else assert(high === -1);
-        return low;
-      }};
-  function _fd_write(fd, iov, iovcnt, pnum) {
-      ;
-      // hack to support printf in SYSCALLS_REQUIRE_FILESYSTEM=0
-      var num = 0;
-      for (var i = 0; i < iovcnt; i++) {
-        var ptr = HEAP32[((iov)>>2)];
-        var len = HEAP32[(((iov)+(4))>>2)];
-        iov += 8;
-        for (var j = 0; j < len; j++) {
-          SYSCALLS.printChar(fd, HEAPU8[ptr+j]);
-        }
-        num += len;
-      }
-      HEAP32[((pnum)>>2)] = num;
-      return 0;
-    }
-
-  function _setTempRet0(val) {
-      setTempRet0(val);
-    }
 var ASSERTIONS = true;
 
 
@@ -1908,16 +1857,62 @@ function intArrayToString(array) {
 
 
 var asmLibraryArg = {
-  "emscripten_memcpy_big": _emscripten_memcpy_big,
-  "fd_write": _fd_write,
-  "setTempRet0": _setTempRet0
+  "emscripten_memcpy_big": _emscripten_memcpy_big
 };
 var asm = createWasm();
 /** @type {function(...*):?} */
 var ___wasm_call_ctors = Module["___wasm_call_ctors"] = createExportWrapper("__wasm_call_ctors");
 
 /** @type {function(...*):?} */
+var _lsoeSolve = Module["_lsoeSolve"] = createExportWrapper("lsoeSolve");
+
+/** @type {function(...*):?} */
+var _lcm = Module["_lcm"] = createExportWrapper("lcm");
+
+/** @type {function(...*):?} */
+var _getDecimalPlaces = Module["_getDecimalPlaces"] = createExportWrapper("getDecimalPlaces");
+
+/** @type {function(...*):?} */
+var _acceleratedMovement = Module["_acceleratedMovement"] = createExportWrapper("acceleratedMovement");
+
+/** @type {function(...*):?} */
+var _uniformMovement = Module["_uniformMovement"] = createExportWrapper("uniformMovement");
+
+/** @type {function(...*):?} */
+var _mixedMovement = Module["_mixedMovement"] = createExportWrapper("mixedMovement");
+
+/** @type {function(...*):?} */
+var _quadraticFormula = Module["_quadraticFormula"] = createExportWrapper("quadraticFormula");
+
+/** @type {function(...*):?} */
 var _pfsSolve = Module["_pfsSolve"] = createExportWrapper("pfsSolve");
+
+/** @type {function(...*):?} */
+var _gcd = Module["_gcd"] = createExportWrapper("gcd");
+
+/** @type {function(...*):?} */
+var _seEvaluate = Module["_seEvaluate"] = createExportWrapper("seEvaluate");
+
+/** @type {function(...*):?} */
+var _taAge = Module["_taAge"] = createExportWrapper("taAge");
+
+/** @type {function(...*):?} */
+var _taCleaningt1 = Module["_taCleaningt1"] = createExportWrapper("taCleaningt1");
+
+/** @type {function(...*):?} */
+var _taCleaningt2 = Module["_taCleaningt2"] = createExportWrapper("taCleaningt2");
+
+/** @type {function(...*):?} */
+var _taCleaningt3 = Module["_taCleaningt3"] = createExportWrapper("taCleaningt3");
+
+/** @type {function(...*):?} */
+var _taLegs = Module["_taLegs"] = createExportWrapper("taLegs");
+
+/** @type {function(...*):?} */
+var _taAcid = Module["_taAcid"] = createExportWrapper("taAcid");
+
+/** @type {function(...*):?} */
+var _taGas = Module["_taGas"] = createExportWrapper("taGas");
 
 /** @type {function(...*):?} */
 var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
@@ -1948,9 +1943,6 @@ var stackRestore = Module["stackRestore"] = createExportWrapper("stackRestore");
 
 /** @type {function(...*):?} */
 var stackAlloc = Module["stackAlloc"] = createExportWrapper("stackAlloc");
-
-/** @type {function(...*):?} */
-var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
 
 
 
@@ -2295,7 +2287,7 @@ function checkUnflushedContent() {
     has = true;
   }
   try { // it doesn't matter if it fails
-    var flush = flush_NO_FILESYSTEM;
+    var flush = null;
     if (flush) flush();
   } catch(e) {}
   out = oldOut;
